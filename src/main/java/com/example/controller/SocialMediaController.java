@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.entity.Message;
 import com.example.service.AccountService;
+import com.example.service.MessageService;
 
 import java.util.List;
 
@@ -21,10 +22,12 @@ import java.util.List;
 public class SocialMediaController {
 
     private final AccountService accountService;
+    private final MessageService messageService;
 
     @Autowired
-    public SocialMediaController(AccountService accountService){
+    public SocialMediaController(AccountService accountService, MessageService messageService){
         this.accountService = accountService;
+        this.messageService = messageService;
     }
 
     @PostMapping("/register")
@@ -79,7 +82,7 @@ public class SocialMediaController {
 
     @GetMapping("/accounts/{accountId}/messages")
     public ResponseEntity<List<Message>> 
-    getAllMessagesByParticularUser(@PathVariable Integer accountId){
+    getUserMessages(@PathVariable Integer accountId){
          List<Message> messages = messageService.getAllMessages(accountId);
             return new ResponseEntity<>(messages, HttpStatus.OK);
     }
