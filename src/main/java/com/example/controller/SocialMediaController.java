@@ -5,11 +5,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.entity.Account;
 import com.example.entity.Message;
 import com.example.service.AccountService;
 import com.example.service.MessageService;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller using Spring. The endpoints you will need can be
@@ -46,15 +48,17 @@ public class SocialMediaController {
     @PostMapping("/messages")
     public ResponseEntity<Message> 
     createMessage(@RequestBody Message message){
-        Message messageCreated = messageService.createMessage(message);
+       // Message messageCreated = 
+        messageService.createMessage(message);
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
 
     @GetMapping("/messages")
-    public ResponseEntity<List<Message>> 
-    getAllMessages(){ List<Message> messages =
-        messageService.getAllMessages();
-            return new ResponseEntity<>(messages, HttpStatus.OK);
+    public ResponseEntity<List<Message>> getAllMessages(){// List<Message> messages =
+     // return  new ResponseEntity<>(messageService.getAllMessages(), HttpStatus.OK);
+       List <Message> messages = messageService.getAllMessages();
+           // return new ResponseEntity<>(messages, HttpStatus.OK);
+           return new ResponseEntity<>(messages,HttpStatus.OK);
 
     } 
 
@@ -76,14 +80,14 @@ public class SocialMediaController {
     public ResponseEntity<Message> 
     updateMessageById(@PathVariable Integer messageId, 
     @RequestBody Message message){
-        Message updatedMessage = messageService.updateMessageById(messageId, message);
+        Message updatedMessage = messageService.updatedMessage(messageId, message);
         return new ResponseEntity<>(updatedMessage, HttpStatus.OK);
     }
 
     @GetMapping("/accounts/{accountId}/messages")
-    public ResponseEntity<List<Message>> 
+    public ResponseEntity<Optional<Message>> 
     getUserMessages(@PathVariable Integer accountId){
-         List<Message> messages = messageService.getAllMessages(accountId);
+          Optional<Message> messages = messageService.getUserMessages(accountId);
             return new ResponseEntity<>(messages, HttpStatus.OK);
     }
 

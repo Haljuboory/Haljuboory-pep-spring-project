@@ -4,18 +4,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.example.dao.MessageDAO;
 import com.example.entity.Message;
 import com.example.repository.AccountRepository;
 import com.example.repository.MessageRepository;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MessageService {
 
     private MessageRepository messageRepository;
     private AccountRepository accountRepository;
+    private MessageDAO messageDAO;
 
     /*
      * The creation of the message will be successful if and only if:
@@ -30,10 +33,13 @@ public class MessageService {
      */
     //@Param messagetext
     public ResponseEntity<Message> createMessage(Message message){
+        if(message !=null){
         if(message.getMessageText().isBlank() || 
         message.getMessageText().length() > 255){
             return new ResponseEntity<Message>(HttpStatus.BAD_REQUEST);
         }
+    }
+
         if(accountRepository.findById(message.getPostedBy()).isEmpty()){
             return new ResponseEntity<Message>(HttpStatus.BAD_REQUEST);
         }
@@ -47,20 +53,31 @@ public class MessageService {
      * It is expected for the list to simply be empty if there are no messages. 
      * The response status should always be 200, which is the default.
      */
-    public ResponseEntity<List<Message>> getAllMessages(){
+    public List<Message> getAllMessages(){
         return messageRepository.findAll();
     }
 
     public Message getMessageById(Integer messageId){
-        return messageRepository.findById().orElsethrow(()-> new
+        return messageRepository.findById(messageId).orElseThrow(()-> new
         RuntimeException("User not found." + messageId));
     }
 
     public Message updatedMessage(Integer messageId, Message updatedMessage){
         Message existingMessage = messageRepository.findById(messageId)
-            .orElsethrow(()-> new RuntimeJsonMappingException
+            .orElseThrow(()-> new RuntimeJsonMappingException
             ("Message not found with id" + messageId));
+        return existingMessage;
+    }
+    
+    public void deleteMessageById(Integer messageId) {
+       // Message userToDelete = 
+        MessageRepository.deleteMessageById(messageId);
+                //.orElseThrow(() -> new RuntimeException("User not found with id " + id));
+        
     }
 
+    public Optional<Message> getUserMessages(Integer accountId){
+        return messageRepository.findById(accountId);
+    }
 
 }
