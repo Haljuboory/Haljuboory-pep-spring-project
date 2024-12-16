@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.example.dao.MessageDAO;
 import com.example.entity.Message;
 import com.example.repository.AccountRepository;
 import com.example.repository.MessageRepository;
@@ -18,7 +17,6 @@ public class MessageService {
 
     private MessageRepository messageRepository;
     private AccountRepository accountRepository;
-    private MessageDAO messageDAO;
 
     /*
      * The creation of the message will be successful if and only if:
@@ -31,15 +29,13 @@ public class MessageService {
 - If the creation of the message is not successful, the response status should be 400. (Client error)
     
      */
-    //@Param messagetext
     public ResponseEntity<Message> createMessage(Message message){
         if(message !=null){
-        if(message.getMessageText().isBlank() || 
-        message.getMessageText().length() > 255){
+        if(message.getMessageText().isBlank() && 
+        message.getMessageText().length() < 255){
             return new ResponseEntity<Message>(HttpStatus.BAD_REQUEST);
         }
     }
-
         if(accountRepository.findById(message.getPostedBy()).isEmpty()){
             return new ResponseEntity<Message>(HttpStatus.BAD_REQUEST);
         }
@@ -57,24 +53,37 @@ public class MessageService {
         return messageRepository.findAll();
     }
 
-    public Message getMessageById(Integer messageId){
-        return messageRepository.findById(messageId).orElseThrow(()-> new
-        RuntimeException("User not found." + messageId));
+    public Optional<Message> getMessageById(Integer messageId){
+        return messageRepository.findById(messageId);
     }
 
-    public Message updatedMessage(Integer messageId, Message updatedMessage){
-        Message existingMessage = messageRepository.findById(messageId)
-            .orElseThrow(()-> new RuntimeJsonMappingException
-            ("Message not found with id" + messageId));
-        return existingMessage;
+    /*
+     * The update of a message should be successful if and only if
+     *  the message id already exists 
+     *  and the new messageText is not blank 
+     *  and is not over 255 characters. 
+     */
+    public int updatedMessage(Integer messageId, Message updatedMessage){
+        Optional<Message> existingMessage = messageRepository.findById(messageId);
+        if(existingMessage.isPresent() && existingMessage !=null 
+        && existingMessage.getMessageText() < 255){
+            messageRepository.findById(messageId);
+            return 1;
+           }
+           return 0;
     }
+
     
-    public void deleteMessageById(Integer messageId) {
-       // Message userToDelete = 
-        MessageRepository.deleteMessageById(messageId);
-                //.orElseThrow(() -> new RuntimeException("User not found with id " + id));
-        
+    public int deleteMessageById(Integer messageId) {
+      
+       Optional<Message> existingMessage = messageRepository.findById(messageId);
+       if(existingMessage.isPresent()){
+        messageRepository.deleteById(messageId);
+        return 1;
+       }
+       return 0;
     }
+
 
     public Optional<Message> getUserMessages(Integer accountId){
         return messageRepository.findById(accountId);

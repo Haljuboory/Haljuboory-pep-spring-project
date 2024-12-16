@@ -20,11 +20,10 @@ import java.util.Optional;
  * refer to prior mini-project labs and lecture materials for guidance on how a controller may be built.
  */
 @RestController
-@RequestMapping
 public class SocialMediaController {
 
-    private final AccountService accountService;
-    private final MessageService messageService;
+    private  AccountService accountService;
+    private  MessageService messageService;
 
     @Autowired
     public SocialMediaController(AccountService accountService, MessageService messageService){
@@ -48,25 +47,24 @@ public class SocialMediaController {
     @PostMapping("/messages")
     public ResponseEntity<Message> 
     createMessage(@RequestBody Message message){
-       // Message messageCreated = 
+       
         messageService.createMessage(message);
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
 
     @GetMapping("/messages")
-    public ResponseEntity<List<Message>> getAllMessages(){// List<Message> messages =
-     // return  new ResponseEntity<>(messageService.getAllMessages(), HttpStatus.OK);
+    public ResponseEntity<List<Message>> getAllMessages(){
        List <Message> messages = messageService.getAllMessages();
-           // return new ResponseEntity<>(messages, HttpStatus.OK);
+           
            return new ResponseEntity<>(messages,HttpStatus.OK);
 
     } 
 
     @GetMapping("/messages/{messageId}")
-    public ResponseEntity<Message> 
+    public ResponseEntity<Integer> 
     getMessageById(@PathVariable Integer messageId){
-        Message message = messageService.getMessageById(messageId);
-        return new ResponseEntity<>(message, HttpStatus.OK);
+        messageService.getMessageById(messageId);
+        return ResponseEntity.status(200).body(1);
     }
 
     @DeleteMapping("/messages/{messageId}")
@@ -76,12 +74,12 @@ public class SocialMediaController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/messages/{messageId}")
-    public ResponseEntity<Message> 
+    @PatchMapping("/messages/{messageId}")
+    public ResponseEntity<Integer> 
     updateMessageById(@PathVariable Integer messageId, 
     @RequestBody Message message){
-        Message updatedMessage = messageService.updatedMessage(messageId, message);
-        return new ResponseEntity<>(updatedMessage, HttpStatus.OK);
+         messageService.updatedMessage(messageId, message);
+        return ResponseEntity.status(200).body(1);
     }
 
     @GetMapping("/accounts/{accountId}/messages")
