@@ -1,11 +1,11 @@
 package com.example.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Message;
-import com.example.repository.AccountRepository;
 import com.example.repository.MessageRepository;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 
@@ -16,7 +16,11 @@ import java.util.Optional;
 public class MessageService {
 
     private MessageRepository messageRepository;
-    private AccountRepository accountRepository;
+    @Autowired
+    public MessageService(MessageRepository messageRepository){
+        this.messageRepository = messageRepository;
+    }
+    
 
     /*
      * The creation of the message will be successful if and only if:
@@ -29,18 +33,16 @@ public class MessageService {
 - If the creation of the message is not successful, the response status should be 400. (Client error)
     
      */
-    public ResponseEntity<Message> createMessage(Message message){
-        if(message !=null){
-        if(message.getMessageText().isBlank() && 
-        message.getMessageText().length() < 255){
-            return new ResponseEntity<Message>(HttpStatus.BAD_REQUEST);
+    public Message createMessage(Message message){
+        if(message.getMessageText().length() == 0 ||
+            message.getMessageText().length() > 255){
+            //return null;
+        if(messageRepository.findById(message.getPostedBy()).isEmpty())
+            return null;
         }
-    }
-        if(accountRepository.findById(message.getPostedBy()).isEmpty()){
-            return new ResponseEntity<Message>(HttpStatus.BAD_REQUEST);
-        }
-        Message newMessage = messageRepository.save(message);
-        return new ResponseEntity<>(newMessage, HttpStatus.OK);
+
+         Message msgCreated = messageRepository.save(message);
+         return msgCreated;
     }
 
     /*
@@ -53,8 +55,15 @@ public class MessageService {
         return messageRepository.findAll();
     }
 
-    public Optional<Message> getMessageById(Integer messageId){
-        return messageRepository.findById(messageId);
+    //Retrieve messages by it's ID
+    public Message getMessageById(Integer messageId){
+        Optional<Message> existingmessage = messageRepository.findById(messageId);
+        if(existingmessage.isPresent()){
+            Message msg = existingmessage.get();
+            //messageRepository.save(msg);
+            return msg;
+        }
+        return null;
     }
 
     /*
@@ -63,30 +72,35 @@ public class MessageService {
      *  and the new messageText is not blank 
      *  and is not over 255 characters. 
      */
-    public int updatedMessage(Integer messageId, Message updatedMessage){
-        Optional<Message> existingMessage = messageRepository.findById(messageId);
-        if(existingMessage.isPresent() && existingMessage !=null 
-        && existingMessage.getMessageText() < 255){
-            messageRepository.findById(messageId);
-            return 1;
-           }
-           return 0;
+    public Message updateMessage(Integer messageId, Message message){
+        Optional<Message> existingmessage = messageRepository.findById(messageId);
+        if(existingmessage.isPresent()){
+            Message msg = existingmessage.get();
+            msg.setMessageText(message.getMessageText());
+            messageRepository.save(msg);
+            return msg;
+        }
+        return null;
+
     }
+    
 
     
-    public int deleteMessageById(Integer messageId) {
-      
-       Optional<Message> existingMessage = messageRepository.findById(messageId);
-       if(existingMessage.isPresent()){
-        messageRepository.deleteById(messageId);
-        return 1;
-       }
-       return 0;
+    public Message deleteMessageById(Integer messageId) {
+        Optional<Message> existingmessage = messageRepository.findById(messageId);
+        if(existingmessage.isPresent()){
+            Message msg = existingmessage.get();
+            messageRepository.delete(msg);
+            return msg;
+        }
+        return null;
+       
     }
 
 
-    public Optional<Message> getUserMessages(Integer accountId){
-        return messageRepository.findById(accountId);
+    public List<Message> getUserMessages(Integer messageId){
+        return messageRepository.findByPostedBy(messageId);
+        
     }
 
 }

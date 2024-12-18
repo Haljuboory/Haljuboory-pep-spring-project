@@ -39,15 +39,17 @@ public class SocialMediaController {
     }
     
     @GetMapping("/login")
-    public ResponseEntity<Account> accountLogin(@RequestBody Account account){
-        Account login = accountService.accountLogin(account);
-        return new ResponseEntity<>(login, HttpStatus.ACCEPTED);
+    public ResponseEntity<Integer> accountLogin(@RequestBody Account account){
+        Account login = accountService.accountLogin(account.getUsername());
+        if(login != null){
+            return  ResponseEntity.status(200).body(1);
+        }
+        return ResponseEntity.status(401).build();
     }
 
     @PostMapping("/messages")
     public ResponseEntity<Message> 
     createMessage(@RequestBody Message message){
-       
         messageService.createMessage(message);
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
@@ -61,31 +63,40 @@ public class SocialMediaController {
     } 
 
     @GetMapping("/messages/{messageId}")
-    public ResponseEntity<Integer> 
-    getMessageById(@PathVariable Integer messageId){
-        messageService.getMessageById(messageId);
-        return ResponseEntity.status(200).body(1);
+    public ResponseEntity<Integer>getMessageById(@PathVariable Integer messageId){
+        Message message2 = messageService.getMessageById(messageId);
+        if(message2 != null){
+            return ResponseEntity.status(200).body(1);
+        }
+        return ResponseEntity.status(200).build();
     }
 
     @DeleteMapping("/messages/{messageId}")
-    public ResponseEntity<Message> 
+    public ResponseEntity<Integer> 
     deleteMessageById(@PathVariable Integer messageId){
+        Message message2 = messageService.getMessageById(messageId);
+        if(message2 != null){
         messageService.deleteMessageById(messageId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.status(200).body(1);
     }
+    return ResponseEntity.status(200).build();
+}
 
     @PatchMapping("/messages/{messageId}")
-    public ResponseEntity<Integer> 
-    updateMessageById(@PathVariable Integer messageId, 
+    public ResponseEntity<Integer> updateMessageById(@PathVariable Integer messageId, 
     @RequestBody Message message){
-         messageService.updatedMessage(messageId, message);
-        return ResponseEntity.status(200).body(1);
+        Message message2 = messageService.getMessageById(messageId);
+        if(message2 != null && message.getMessageText() != "" && message.getMessageText().length() < 255){
+           messageService.updateMessage(messageId, message); 
+           return ResponseEntity.status(200).body(1);
+        }
+        return ResponseEntity.status(400).build();
+        
     }
 
     @GetMapping("/accounts/{accountId}/messages")
-    public ResponseEntity<Optional<Message>> 
-    getUserMessages(@PathVariable Integer accountId){
-          Optional<Message> messages = messageService.getUserMessages(accountId);
+    public ResponseEntity<List<Message>> getUserMessages(@PathVariable Integer accountId){
+          List<Message> messages = messageService.getUserMessages(accountId);
             return new ResponseEntity<>(messages, HttpStatus.OK);
     }
 
