@@ -36,8 +36,9 @@ public class MessageService {
     public Message createMessage(Message message){
         if(message.getMessageText().length() == 0 ||
             message.getMessageText().length() > 255){
-            //return null;
-        if(messageRepository.findById(message.getPostedBy()).isEmpty())
+            return null;
+        }
+        if(messageRepository.findById(message.getPostedBy()).isEmpty()){
             return null;
         }
 

@@ -40,16 +40,11 @@ public class AccountService {
      * The login will be successful if and only if: 
      * the username and password provided in the request body JSON match a real account existing on the database.
      */
-    public Account accountLogin(String username){
+    public Account accountLogin(String username, String password){
       Account existingAccount = accountRepository.findByUsername(username);
-      // if(existingAccount != null){
-       Account account = existingAccount;
-      accountRepository.save(account);
-      //     return account;
-      // }
-      return account;
-    
- 
+      if(existingAccount != null && existingAccount.getPassword().equals(password)){
+      return existingAccount;
      }
-    
+     return null;
+    }
 }

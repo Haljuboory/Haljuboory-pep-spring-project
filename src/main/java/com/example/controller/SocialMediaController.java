@@ -35,40 +35,45 @@ public class SocialMediaController {
     public ResponseEntity<Account> 
     registerAccount(@RequestBody Account account){
         Account accountRegistered = accountService.registerAccount(account);
-            return new ResponseEntity<>(accountRegistered, HttpStatus.CREATED);
+        if(accountRegistered != null){
+            return new ResponseEntity<>(accountRegistered, HttpStatus.OK);
+
+        }
+            return new ResponseEntity<>(accountRegistered, HttpStatus.CONFLICT);
     }
     
-    @GetMapping("/login")
-    public ResponseEntity<Integer> accountLogin(@RequestBody Account account){
-        Account login = accountService.accountLogin(account.getUsername());
+    @PostMapping("/login")
+    public ResponseEntity<Account> accountLogin(@RequestBody Account account){
+        Account login = accountService.accountLogin(account.getUsername(), account.getPassword());
         if(login != null){
-            return  ResponseEntity.status(200).body(1);
+            return new ResponseEntity<>(login, HttpStatus.OK);
         }
-        return ResponseEntity.status(401).build();
+        return new ResponseEntity<>(login, HttpStatus.UNAUTHORIZED);
     }
 
     @PostMapping("/messages")
     public ResponseEntity<Message> 
     createMessage(@RequestBody Message message){
-        messageService.createMessage(message);
-        return new ResponseEntity<>(message, HttpStatus.CREATED);
+        Message msg = messageService.createMessage(message);
+        if(msg != null){
+            return new ResponseEntity<>(msg, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/messages")
     public ResponseEntity<List<Message>> getAllMessages(){
        List <Message> messages = messageService.getAllMessages();
-           
            return new ResponseEntity<>(messages,HttpStatus.OK);
-
     } 
 
     @GetMapping("/messages/{messageId}")
-    public ResponseEntity<Integer>getMessageById(@PathVariable Integer messageId){
-        Message message2 = messageService.getMessageById(messageId);
-        if(message2 != null){
-            return ResponseEntity.status(200).body(1);
+    public ResponseEntity<Message>getMessageById(@PathVariable Integer messageId){
+        Message msg = messageService.getMessageById(messageId);
+        if(msg!= null){
+            return new ResponseEntity<>(msg, HttpStatus.OK);
         }
-        return ResponseEntity.status(200).build();
+        return new ResponseEntity<>(msg, HttpStatus.OK);
     }
 
     @DeleteMapping("/messages/{messageId}")
